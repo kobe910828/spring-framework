@@ -85,6 +85,14 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 	private ExposeInvocationInterceptor() {
 	}
 
+
+	/**
+	 *
+	 * 用于暴露 MethodInvocation 对象到 ThreadLocal 中
+	 * 如果其他地方需要当前的 MethodInvocation 对象，直接通过调用 currentInvocation 方法取出
+	 * 调用MethodInvocation的invoke()方法，执行下一个拦截器逻辑
+	 *
+	 */
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		MethodInvocation oldInvocation = invocation.get();

@@ -2,6 +2,18 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-	<bean id="loginService" class="source.LoginService"/>
+	<bean id="loginService" class="source.LoginService" lazy-init="true"/>
 	<bean id="user" class="source.factorybean.UserFactoryBean"/>
+
+	<bean id="myAware" class="source.aware.MyApplicationAware"/>
+
+	<bean id="myBeanPostProcessor" class="source.beanpostprocessor.MyBeanPostProcessor"/>
+
+	<bean id="student" class="source.Student">
+		<property name="name" value="chenssy"/>
+		<property name="age" value="10"/>
+	</bean>
+
+	<bean class="source.beanfactorypostprocessor.BeanFactoryPostProcessor_1"/>
+	<bean class="source.beanfactorypostprocessor.BeanFactoryPostProcessor_2"/>
 </beans>

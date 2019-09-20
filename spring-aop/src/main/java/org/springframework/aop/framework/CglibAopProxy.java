@@ -165,9 +165,13 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Class<?> rootClass = this.advised.getTargetClass();
 			Assert.state(rootClass != null, "Target class must be available for creating a CGLIB proxy");
 
+			// 判断当前类是否是已经通过Cglib代理生成的类，如果是，则获取其原始父类，
+			// 并将其接口设置到需要代理的接口中
 			Class<?> proxySuperClass = rootClass;
 			if (rootClass.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)) {
+				// 获取父类
 				proxySuperClass = rootClass.getSuperclass();
+				// 获取父类实现的接口，并将其设置到需要代理的接口中
 				Class<?>[] additionalInterfaces = rootClass.getInterfaces();
 				for (Class<?> additionalInterface : additionalInterfaces) {
 					this.advised.addInterface(additionalInterface);
@@ -175,9 +179,15 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 
 			// Validate the class, writing log messages as necessary.
+			// 对目标类进行检查，检查点主要有三个：
+			// 1.目标方法不能使用final修饰
+			// 2.目标方法不能是private类型的
+			// 3.目标方法不能是包访问权限的
+			// 以上三点符合其中的一个，当前方法就不能被代理。
 			validateClassIfNecessary(proxySuperClass, classLoader);
 
 			// Configure CGLIB Enhancer...
+			// 创建Enhancer对象，并进行设置
 			Enhancer enhancer = createEnhancer();
 			if (classLoader != null) {
 				enhancer.setClassLoader(classLoader);
@@ -186,22 +196,30 @@ class CglibAopProxy implements AopProxy, Serializable {
 					enhancer.setUseCache(false);
 				}
 			}
+			// 设置Superclass为当前目标类
 			enhancer.setSuperclass(proxySuperClass);
+			// 设置需要代理的接口
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setStrategy(new ClassLoaderAwareUndeclaredThrowableStrategy(classLoader));
 
+			// 获取需要织入到代理类中的逻辑
+			// 返回多个切面逻辑的数组
 			Callback[] callbacks = getCallbacks(rootClass);
 			Class<?>[] types = new Class<?>[callbacks.length];
 			for (int x = 0; x < types.length; x++) {
 				types[x] = callbacks[x].getClass();
 			}
 			// fixedInterceptorMap only populated at this point, after getCallbacks call above
+			// 设置代理类中各个方法将要使用的切面逻辑，这里ProxyCallbackFilter.accept()方法返回
+			// 的整型值正好一一对应上面的Callback数组中各个切面逻辑的下标，也就是说这里的CallbackFilter
+			// 的作用正好指定了代理类中各个方法将要使用的Callback数组中的哪个或哪几个切面逻辑
 			enhancer.setCallbackFilter(new ProxyCallbackFilter(
 					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset));
 			enhancer.setCallbackTypes(types);
 
 			// Generate the proxy class and create a proxy instance.
+			// 生成代理类和代理对象
 			return createProxyClassAndInstance(enhancer, callbacks);
 		}
 		catch (CodeGenerationException | IllegalArgumentException ex) {

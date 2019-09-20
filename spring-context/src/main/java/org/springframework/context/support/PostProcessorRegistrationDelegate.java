@@ -51,7 +51,13 @@ final class PostProcessorRegistrationDelegate {
 	private PostProcessorRegistrationDelegate() {
 	}
 
-
+	/**
+	 *
+	 * 类似BeanPostProcessor的注册
+	 * 对所有的 BeanDefinitionRegistryPostProcessors 、手动注册的 BeanFactoryPostProcessor
+	 * 以及通过配置文件方式的 BeanFactoryPostProcessor 按照 PriorityOrdered 、 Ordered、no ordered 三种方式分开处理、调用。
+	 *
+	 */
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
@@ -185,6 +191,16 @@ final class PostProcessorRegistrationDelegate {
 		beanFactory.clearMetadataCache();
 	}
 
+
+	/**
+	 * 注：由下而上，下面的BeanPostProcessor能享受到上面的BeanPostProcessor的初始化前后处理。
+	 * 自动注册BeanPostProcessor(在注册之前先初始化(调用getBean()方法)和排序)
+	 * 1.注册实现了PriorityOrdered接口的BeanPostProcessor
+	 * 2.注册实现了Ordered接口的BeanPostProcessor
+	 * 3.注册普通的BeanPostProcessor
+	 * 4.注册MergedBeanDefinitionPostProcessor
+	 *
+	 */
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 

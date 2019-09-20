@@ -115,6 +115,13 @@ class ConstructorResolver {
 	 * or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
+
+	/**
+	 *
+	 * 首先确定构造函数参数、构造函数，然后调用相应的初始化策略进行 bean 的初始化。关于如何确定构造函数、构造参数，
+	 * 该部分逻辑和 #instantiateUsingFactoryMethod(...) 方法，基本一致
+	 *
+	 */
 	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
 			@Nullable Constructor<?>[] chosenCtors, @Nullable Object[] explicitArgs) {
 
@@ -374,22 +381,35 @@ class ConstructorResolver {
 	 * method, or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
+	/**
+	 *
+	 * 一句话概括就是：确定工厂对象，然后获取构造函数和构造参数，最后调用 InstantiationStrategy 对象的
+	 * #instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner, Constructor<?> ctor, Object... args) 方法，
+	 * 来创建 Bean 实例。
+	 *
+	 */
 	public BeanWrapper instantiateUsingFactoryMethod(
 			String beanName, RootBeanDefinition mbd, @Nullable Object[] explicitArgs) {
 
+		// 构造 BeanWrapperImpl 对象
 		BeanWrapperImpl bw = new BeanWrapperImpl();
+		// 初始化 BeanWrapperImpl
+		// 向BeanWrapper对象中添加 ConversionService 对象和属性编辑器 PropertyEditor 对象
 		this.beanFactory.initBeanWrapper(bw);
 
+		// <1> 获得 factoryBean、factoryClass、isStatic、factoryBeanName 属性
 		Object factoryBean;
 		Class<?> factoryClass;
 		boolean isStatic;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
+		// 工厂名不为空【实例工厂方法】
 		if (factoryBeanName != null) {
 			if (factoryBeanName.equals(beanName)) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 						"factory-bean reference points back to the same bean definition");
 			}
+			// 获取工厂实例
 			factoryBean = this.beanFactory.getBean(factoryBeanName);
 			if (mbd.isSingleton() && this.beanFactory.containsSingleton(beanName)) {
 				throw new ImplicitlyAppearedSingletonException();
@@ -397,8 +417,11 @@ class ConstructorResolver {
 			factoryClass = factoryBean.getClass();
 			isStatic = false;
 		}
+		// 静态工厂方法
 		else {
 			// It's a static factory method on the bean class.
+			// 工厂名为空，则其可能是一个【静态工厂】
+			// 静态工厂创建bean，必须要提供工厂的全类名
 			if (!mbd.hasBeanClass()) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 						"bean definition declares neither a bean class nor a factory-bean reference");
@@ -615,6 +638,7 @@ class ConstructorResolver {
 			}
 		}
 
+		//使用相应的初始化策略进行初始化
 		bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, factoryMethodToUse, argsToUse));
 		return bw;
 	}

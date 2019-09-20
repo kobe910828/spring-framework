@@ -4,4 +4,20 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 	<bean id="loginService" class="source.LoginService"/>
 	<bean id="user" class="source.factorybean.UserFactoryBean"/>
+
+	<bean id="car1" class="source.factory.StaticFactory" factory-method="getCar">
+		<constructor-arg value="baoma"/>
+	</bean>
+
+	<bean id="carFactory" class="source.factory.InstanceFactory"/>
+	<bean id="car2" factory-bean="carFactory" factory-method="getCar">
+		<constructor-arg value="baoma"/>
+	</bean>
+
+	<bean id="myAware" class="source.aware.MyApplicationAware"/>
+
+
+
+
+
 </beans>
