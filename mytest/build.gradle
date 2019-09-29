@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.2.0.BUILD-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile(project(":spring-beans"))
+    compile(project(":spring-core"))
+    compile(project(":spring-expression"))
+    compile(project(":spring-context"))
+    compile(project(":spring-instrument"))
+    compile(project(":spring-aop"))
+    compile(project(":spring-aspects"))
+    //数据源配置
+    compile(project(":spring-jdbc"))
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.30'
+
+    testCompile(project(":spring-test"))
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

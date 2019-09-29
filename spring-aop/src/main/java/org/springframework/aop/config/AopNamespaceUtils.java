@@ -55,10 +55,12 @@ public abstract class AopNamespaceUtils {
 
 	public static void registerAutoProxyCreatorIfNecessary(
 			ParserContext parserContext, Element sourceElement) {
-
+		// 注册InfrastructureAdvisorAutoProxyCreator(Bean)
 		BeanDefinition beanDefinition = AopConfigUtils.registerAutoProxyCreatorIfNecessary(
 				parserContext.getRegistry(), parserContext.extractSource(sourceElement));
+		// 设置proxy-target-class配置和expose-proxy配置
 		useClassProxyingIfNecessary(parserContext.getRegistry(), sourceElement);
+		// 注册InfrastructureAdvisorAutoProxyCreator为component组件
 		registerComponentIfNecessary(beanDefinition, parserContext);
 	}
 
